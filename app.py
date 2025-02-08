@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request
 import pickle
-import os
 
-# Load the model and vectorizer
-model = pickle.load(open("model.pkl", "rb"))
-vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
+# Load the model and vectorizer with correct filenames
+model = pickle.load(open("optimized_rf_model.pkl", "rb"))
+vectorizer = pickle.load(open("tfidf_vectorizer.pkl", "rb"))
 
+# Initialize Flask app
 app = Flask(__name__)
 
 @app.route("/")
@@ -15,7 +15,7 @@ def home():
 @app.route("/predict", methods=["POST"])
 def predict():
     if request.method == "POST":
-        # Get text input
+        # Get text input from form
         news_text = request.form.get("news_text", "").strip()
 
         # Check if a file was uploaded
@@ -31,6 +31,7 @@ def predict():
         text_vectorized = vectorizer.transform([news_text])
         prediction = model.predict(text_vectorized)[0]
 
+        # Determine result
         result = "Fake News" if prediction == 1 else "Real News"
 
         return render_template("index.html", prediction_text=f"Prediction: {result}")
